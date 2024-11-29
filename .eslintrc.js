@@ -18,13 +18,13 @@ module.exports = {
     jest: true,
   },
   ignorePatterns: [".eslintrc.js", "global.d.ts"],
-  "prettier/prettier": [
-    "error",
-    {
-      endOfLine: "auto",
-    },
-  ],
   rules: {
+    "prettier/prettier": [
+      "error",
+      {
+        endOfLine: "auto",
+      },
+    ],
     "unused-imports/no-unused-imports": "error",
     "@typescript-eslint/triple-slash-reference": "off",
     "@typescript-eslint/interface-name-prefix": "off",

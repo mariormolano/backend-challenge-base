@@ -37,5 +37,3 @@ lerna-debug.log*
 
 # environment
 .env
-
-/src
