@@ -1,6 +1,8 @@
-import { Controller, Get, Post, Query, Res } from "@nestjs/common";
+import { Controller, Get, Post, Query, Res, Req } from "@nestjs/common";
 import { Response } from "express";
 import { MovieService } from "./movie.service";
+import { SupabaseService } from "../../../auth/service/supabase/supabase.service";
+import type { UserResponse } from "@supabase/supabase-js";
 
 @Controller("movie")
 export class MovieController {
@@ -69,5 +71,58 @@ export class MovieController {
     } else {
       res.status(201).json(await this.movieService.setFavoriteMovie(id, favorite));
     }
+  }
+
+  @Get("protected")
+  public async getprotected(
+    @Req() req: Request,
+    @Res() res: Response,
+    @Query("page") page: number,
+  ): Promise<void> {
+    const supabase = new SupabaseService();
+    const authHeader = req.headers["authorization"];
+    const token: string = authHeader.replace("Bearer ", "");
+    //const token: string = "fmskdfkwi303j2k34si39j32jr93jw9";
+    await supabase
+      .getUser(token)
+      .then(async (user: UserResponse) => {
+        if (user.data.user) {
+          res.status(201).json(await this.movieService.getFavoriteMovies(page ? Number(page) : 1));
+        } else {
+          res.status(401).json({ Error: "Unauthorized" });
+        }
+      })
+      .catch(() => {
+        res.status(401).json({ Error: "Unauthorized" });
+      });
+  }
+
+  @Post("protected")
+  public async setprotected(
+    @Req() req: Request,
+    @Res() res: Response,
+    @Query("id") id: number,
+    @Query("favorite") favorite: string,
+  ): Promise<void> {
+    const supabase = new SupabaseService();
+    const authHeader = req.headers["authorization"];
+    const token: string = authHeader.replace("Bearer ", "");
+    //const token: string = "fmskdfkwi303j2k34si39j32jr93jw9";
+    await supabase
+      .getUser(token)
+      .then(async (user: UserResponse) => {
+        if (user.data.user) {
+          if (!id) {
+            res.status(400).json({ Error: "id is required" });
+          } else {
+            res.status(201).json(await this.movieService.setFavoriteMovie(id, favorite));
+          }
+        } else {
+          res.status(401).json({ Error: "Unauthorized" });
+        }
+      })
+      .catch(() => {
+        res.status(401).json({ Error: "Unauthorized" });
+      });
   }
 }

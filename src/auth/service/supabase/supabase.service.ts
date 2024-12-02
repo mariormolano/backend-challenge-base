@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import type { SupabaseClient } from "@supabase/supabase-js";
+import type { SupabaseClient, UserResponse } from "@supabase/supabase-js";
 import { createClient } from "@supabase/supabase-js";
 
 @Injectable()
@@ -13,7 +13,7 @@ export class SupabaseService {
     );
   }
 
-  public async getUser(token: string): Promise<Object> {
+  public async getUser(token: string): Promise<UserResponse> {
     return this.supabase.auth.getUser(token);
   }
 }

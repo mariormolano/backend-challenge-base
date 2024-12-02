@@ -143,11 +143,17 @@ export class MovieService {
         api_key: this.apiKey,
       };
 
-      const response = await firstValueFrom(
+      const response: object = await firstValueFrom(
         this.httpService
           .get(`${this.baseUrl}/movie/now_playing`, { params })
           .pipe(map((response) => response.data as Movie[])),
       );
+
+      if (response["results"].length > 0) {
+        // Ordena los resultados por vote_count
+        response["results"].sort((a, b) => b.vote_count - a.vote_count);
+      }
+
       return response;
     } catch (error) {
       throw new HttpException("Error API of TMDB", HttpStatus.BAD_GATEWAY);
@@ -156,14 +162,30 @@ export class MovieService {
 
   public async getUpcomingMovies(page: number): Promise<Object> {
     try {
+      ///discover/movie?
+      //sort_by=primary_release_date.asc
+      //primary_release_date.gte=2024-12-01
+      //primary_release_date.lte=2024-12-31
+      const getDateNow = new Date();
+      const year = getDateNow.getFullYear();
+      const month = getDateNow.getMonth() + 1;
+      const day = getDateNow.getDate();
+
+      const nextMonth = month === 12 ? 1 : month + 1;
+      const nextYear = month === 12 ? year + 1 : year;
+
       const params: object = {
         page: page,
         api_key: this.apiKey,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        "primary_release_date.gte": `${year}-${month}-${day}`,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        "primary_release_date.lte": `${nextYear}-${nextMonth}-${day}`,
       };
 
       const response = await firstValueFrom(
         this.httpService
-          .get(`${this.baseUrl}/movie/upcoming`, { params })
+          .get(`${this.baseUrl}/discover/movie`, { params })
           .pipe(map((response) => response.data as Movie[])),
       );
       return response;
